@@ -4,10 +4,59 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pagamento</title>
-  <link rel="stylesheet" href="/public/css/styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      text-align: center;
+      padding: 20px;
+    }
+    .mensagem {
+      background-color: #ffeb3b;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 18px;
+      color: #333;
+      max-width: 600px;
+      margin: 20px auto;
+      border: 2px solid #ff9800;
+    }
+    h1 {
+      color: #4CAF50;
+    }
+    .alerta {
+      color: red;
+      font-weight: bold;
+    }
+
+    .whatsapp-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #25D366;
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.whatsapp-button:hover {
+  background-color: #20b558;
+}
+
+  </style>
 </head>
 <body>
-  <h1>Pagamento</h1>
-  <p><%= mensagem %></p>
+  <h1>Finalizar Pagamento</h1>
+
+  <div class="mensagem">
+    <p><%= mensagem %></p>
+    <p class="alerta">Envie o comprovante de pagamento para o WhatsApp:<br> <strong>(83)98760-7555</strong> <br> o mais rápido possível!</p>
+    <p>Se o comprovante não for enviado em até <strong>30 minutos</strong>, os números reservados serão disponibilizados novamente.</p>
+
+    <a href="https://wa.me/55SEUNUMERO?text=Olá! Reservei os números na rifa e estou enviando o comprovante de pagamento." class="whatsapp-button">Enviar Comprovante via WhatsApp</a>
+  </div>
+
+  
 </body>
 </html>

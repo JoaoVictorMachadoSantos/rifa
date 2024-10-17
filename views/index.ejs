@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Escolha seus Números</title>
-  <link rel="stylesheet" href="/public/css/styles.css">
+  <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
   <h1>Rifa - Escolha seus números</h1>
@@ -18,15 +18,24 @@
 
     <h3>Escolha os números disponíveis:</h3>
     <div class="numeros">
-      <% numerosDisponiveis.forEach(function(numero) { %>
+      <% numeros.forEach(function(numero) { %>  <!-- Aqui usamos a variável numeros -->
         <div class="numero-opcao">
-          <input type="checkbox" id="numero-<%= numero.numero %>" name="numeros" value="<%= numero.numero %>">
-          <label for="numero-<%= numero.numero %>"><%= numero.numero %></label>
+          <input type="checkbox" id="numero-<%= numero.numero %>" name="numeros" value="<%= numero.numero %>" <%= numero.reservado ? 'disabled' : '' %>>
+          <label for="numero-<%= numero.numero %>" class="<%= numero.reservado ? 'reservado' : '' %>">
+            <%= numero.numero %>
+          </label>
         </div>
       <% }) %>
     </div>
 
     <button type="submit">Reservar Números</button>
   </form>
+
+  <style>
+    .reservado {
+      color: red; /* Cor para números reservados */
+      text-decoration: line-through; /* Opcional: riscar o texto */
+    }
+  </style>
 </body>
 </html>

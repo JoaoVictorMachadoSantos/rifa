@@ -22,39 +22,56 @@ const pool = new pg.Pool({
 });
 
 // Rota principal para exibir números disponíveis
+// Rota principal para exibir números disponíveis
 app.get('/', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT numero FROM numeros WHERE reservado = false');
-    const numerosDisponiveis = result.rows;
-    res.render('index', { numerosDisponiveis });
-  } catch (err) {
-    console.error(err);
-    res.send('Erro ao buscar números disponíveis');
-  }
-});
-
-// Rota para reservar números
-app.post('/reservar', async (req, res) => {
-  const { nome, whatsapp, numeros } = req.body;
-
-  try {
-    if (!Array.isArray(numeros)) {
-      return res.send('Você deve selecionar pelo menos um número.');
+    try {
+      const result = await pool.query('SELECT numero, reservado FROM numeros');
+      const numeros = result.rows; // Obtemos todos os números
+      res.render('index', { numeros }); // Certifique-se de que "numeros" está sendo passado aqui
+    } catch (err) {
+      console.error('Erro ao buscar números disponíveis:', err);
+      res.send('Erro ao buscar números disponíveis');
     }
+  });
+  
+  
 
-    await pool.query('BEGIN');
-    for (const numero of numeros) {
-      await pool.query('UPDATE numeros SET reservado = true, nome = $1, whatsapp = $2 WHERE numero = $3 AND reservado = false', [nome, whatsapp, numero]);
+  app.post('/reservar', async (req, res) => {
+    let { nome, whatsapp, numeros } = req.body;
+  
+    try {
+      // Garantir que "numeros" seja um array, mesmo que só um número tenha sido selecionado
+      if (!Array.isArray(numeros)) {
+        numeros = [numeros];  // Converte para array se for um único número
+      }
+  
+      if (numeros.length === 0) {
+        return res.send('Você deve selecionar pelo menos um número.');
+      }
+  
+      await pool.query('BEGIN');
+  
+      for (const numero of numeros) {
+        const result = await pool.query('UPDATE numeros SET reservado = true, nome = $1, whatsapp = $2 WHERE numero = $3 AND reservado = false', [nome, whatsapp, numero]);
+        if (result.rowCount === 0) {
+          console.log(`Número ${numero} já está reservado ou não existe.`);
+        } else {
+          console.log(`Número ${numero} reservado com sucesso.`);
+        }
+      }
+  
+      await pool.query('COMMIT');
+  
+      res.render('pagamento', { 
+        mensagem: 'Por favor, realize o pagamento e envie o comprovante para o WhatsApp informado de imediato. Caso contrário, os números reservados voltarão a ficar disponíveis em 30 minutos.' 
+      });
+    } catch (err) {
+      await pool.query('ROLLBACK');
+      console.error('Erro ao reservar números:', err);
+      res.send('Erro ao reservar números. Por favor, tente novamente.');
     }
-    await pool.query('COMMIT');
-    
-    res.render('pagamento', { mensagem: 'Por favor, realize o pagamento e envie o comprovante para o WhatsApp informado.' });
-  } catch (err) {
-    await pool.query('ROLLBACK');
-    console.error(err);
-    res.send('Erro ao reservar números. Por favor, tente novamente.');
-  }
-});
+  });
+  
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
