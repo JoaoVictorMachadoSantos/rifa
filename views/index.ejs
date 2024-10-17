@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escolha seus Números</title>
+  <link rel="stylesheet" href="/public/css/styles.css">
+</head>
+<body>
+  <h1>Rifa - Escolha seus números</h1>
+
+  <form method="POST" action="/reservar">
+    <label for="nome">Nome:</label>
+    <input type="text" id="nome" name="nome" required>
+
+    <label for="whatsapp">WhatsApp:</label>
+    <input type="text" id="whatsapp" name="whatsapp" required>
+
+    <h3>Escolha os números disponíveis:</h3>
+    <div class="numeros">
+      <% numerosDisponiveis.forEach(function(numero) { %>
+        <div class="numero-opcao">
+          <input type="checkbox" id="numero-<%= numero.numero %>" name="numeros" value="<%= numero.numero %>">
+          <label for="numero-<%= numero.numero %>"><%= numero.numero %></label>
+        </div>
+      <% }) %>
+    </div>
+
+    <button type="submit">Reservar Números</button>
+  </form>
+</body>
+</html>

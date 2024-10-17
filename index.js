@@ -1,50 +1,61 @@
 const express = require('express');
-const { Pool } = require('pg');
+const pg = require('pg');
+const dotenv = require('dotenv');
 const path = require('path');
-require('dotenv').config();
+
+dotenv.config();
 
 const app = express();
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false,
-  },
-});
+const port = 3000;
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+// Configuração do EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Página inicial
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Conectando ao PostgreSQL
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+// Rota principal para exibir números disponíveis
 app.get('/', async (req, res) => {
   try {
     const result = await pool.query('SELECT numero FROM numeros WHERE reservado = false');
-    const numerosDisponiveis = result.rows.map(row => row.numero);
+    const numerosDisponiveis = result.rows;
     res.render('index', { numerosDisponiveis });
   } catch (err) {
     console.error(err);
-    res.send('Erro ao carregar números.');
+    res.send('Erro ao buscar números disponíveis');
   }
 });
 
-// Página de pagamento
-app.post('/pagamento', async (req, res) => {
+// Rota para reservar números
+app.post('/reservar', async (req, res) => {
   const { nome, whatsapp, numeros } = req.body;
-  try {
-    // Marcar os números escolhidos como reservados no banco de dados
-    await pool.query('UPDATE numeros SET reservado = true, nome = $1, whatsapp = $2 WHERE numero = ANY($3)', [nome, whatsapp, numeros]);
 
-    res.render('pagamento', { nome, whatsapp, numeros });
+  try {
+    if (!Array.isArray(numeros)) {
+      return res.send('Você deve selecionar pelo menos um número.');
+    }
+
+    await pool.query('BEGIN');
+    for (const numero of numeros) {
+      await pool.query('UPDATE numeros SET reservado = true, nome = $1, whatsapp = $2 WHERE numero = $3 AND reservado = false', [nome, whatsapp, numero]);
+    }
+    await pool.query('COMMIT');
+    
+    res.render('pagamento', { mensagem: 'Por favor, realize o pagamento e envie o comprovante para o WhatsApp informado.' });
   } catch (err) {
+    await pool.query('ROLLBACK');
     console.error(err);
-    res.send('Erro ao processar pagamento.');
+    res.send('Erro ao reservar números. Por favor, tente novamente.');
   }
 });
 
-// Servidor escutando
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
+app.listen(port, () => {
+  console.log(`Servidor rodando na porta ${port}`);
 });
