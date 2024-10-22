@@ -1,0 +1,5 @@
+codigo para realizar a confirmação de um pagamento no querryselector do banco :
+
+UPDATE numeros SET confirmado = TRUE WHERE numero = $1; <<< NÃO TA FUNCIONANDO 
+
+

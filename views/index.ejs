@@ -1,13 +1,26 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Escolha seus Números</title>
+  <title>rifa da Cida</title>
   <link rel="stylesheet" href="/css/styles.css">
-</head>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  
 <body>
-  <h1>Rifa - Escolha seus números</h1>
+  <h1>Rifa - Geléia Iluminadora Corporal Lily Glow 250g <br> SORTEIO DIA 29/10 </h1>
+
+  <!-- Carrossel de Fotos -->
+  <div class="carousel">
+    <button class="carousel-button prev" onclick="moveSlide(-1)">❮</button>
+    <div class="carousel-images">
+      <img src="/midia/imagem1.png" alt="Produto 1">
+      <img src="/midia/imagem2.png" alt="Produto 2">
+      <img src="/midia/imagem3.png" alt="Produto 3">
+      <!-- Adicione mais imagens conforme necessário -->
+    </div>
+    <button class="carousel-button next" onclick="moveSlide(1)">❯</button>
+  </div>
 
   <form method="POST" action="/reservar">
     <label for="nome">Nome:</label>
@@ -18,7 +31,7 @@
 
     <h3>Escolha os números disponíveis:</h3>
     <div class="numeros">
-      <% numeros.forEach(function(numero) { %>  <!-- Aqui usamos a variável numeros -->
+      <% numeros.forEach(function(numero) { %>
         <div class="numero-opcao">
           <input type="checkbox" id="numero-<%= numero.numero %>" name="numeros" value="<%= numero.numero %>" <%= numero.reservado ? 'disabled' : '' %>>
           <label for="numero-<%= numero.numero %>" class="<%= numero.reservado ? 'reservado' : '' %>">
@@ -27,15 +40,55 @@
         </div>
       <% }) %>
     </div>
-
+    <p id="total">Total: R$ 0,00</p> <!-- Exibe o valor total inicial -->
     <button type="submit">Reservar Números</button>
   </form>
 
-  <style>
-    .reservado {
-      color: red; /* Cor para números reservados */
-      text-decoration: line-through; /* Opcional: riscar o texto */
+  
+
+  <script>
+    let currentSlide = 0;
+    const totalSlides = document.querySelector('.carousel-images').children.length;
+    const intervalTime = 5000; 
+
+    function showSlide(index) {
+      const slides = document.querySelector('.carousel-images');
+      currentSlide = (index + totalSlides) % totalSlides; 
+      slides.style.transform = `translateX(${-currentSlide * 100}%)`;
     }
-  </style>
+
+    function moveSlide(direction) {
+      showSlide(currentSlide + direction);
+    }
+
+    // Inicializa o carrossel
+    showSlide(currentSlide);
+
+    // Intervalo automático para mudar de slide
+    setInterval(() => {
+      showSlide(currentSlide + 1);
+    }, intervalTime);
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const checkboxes = document.querySelectorAll('input[name="numeros"]');
+      const totalDisplay = document.getElementById('total');
+      const pricePerNumber = 3; // Preço por número
+
+      function updateTotal() {
+        let total = 0;
+        checkboxes.forEach(checkbox => {
+          if (checkbox.checked && !checkbox.disabled) {
+            total += pricePerNumber;
+          }
+        });
+        totalDisplay.textContent = `Total: R$ ${total},00`; // Exibe o total atualizado
+      }
+
+      // Atualiza o total sempre que o estado de uma checkbox muda
+      checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateTotal);
+      });
+    });
+  </script>
 </body>
 </html>
